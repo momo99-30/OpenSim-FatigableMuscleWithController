@@ -60,9 +60,8 @@ void TugOfWarController::computeControls(const SimTK::State& s, SimTK::Vector& c
     double zdesa = desiredModelZAcceleration(t);
 
     // Get the z translation coordinate in the model.
-    const Coordinate& zCoord = _model->getCoordinateSet().
-        get("blockToGround_zTranslation");
-
+    //const Coordinate& zCoord = _model->getCoordinateSet().get("blockToGround_zTranslation");
+    const Coordinate& zCoord = _model->getCoordinateSet().get("blockToGround_coord_5");
     // Get the current position of the block in the tug-of-war
     // model.
     double z = zCoord.getValue(s);

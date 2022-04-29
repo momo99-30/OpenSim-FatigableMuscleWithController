@@ -159,9 +159,9 @@ int main()
         muscAnalysis->setComputeMoments(false);
         osimModel.addAnalysis(muscAnalysis);
 
-      /*  AfferentAnalysis* affAnalysis = new AfferentAnalysis(&osimModel);
+ /*       AfferentAnalysis* affAnalysis = new AfferentAnalysis(&osimModel);
         affAnalysis->specifyMuscle("fatigable");
-        osimModel.addAnalysis(affAnalysis);*/
+        osimModel.addAnalysis(affAnalysis); */
 
         osimModel.setUseVisualizer(false);
         //////////////////////////
@@ -185,13 +185,28 @@ int main()
         // Last coordinate (index 5) is the Z translation of the block
         coordinates[4].setLocked(si, true);
 
-        Coordinate& zCoord = coordinates.get(blockToGround->getCoordinate(FreeJoint::Coord::TranslationZ).getName());
+        //Coordinate& zCoord = coordinates.get(blockToGround->getCoordinate(FreeJoint::Coord::TranslationZ).getName());
+        Coordinate& zCoord = coordinates.get("blockToGround_coord_5");
         zCoord.setSpeedValue(si, 0.0 * Pi);
-
+         
+        std::cout << "z translation" << blockToGround->getCoordinate(FreeJoint::Coord::TranslationZ).getName();
         // Compute initial conditions for muscles
         osimModel.equilibrateMuscles(si);
         SimTK::RungeKuttaMersonIntegrator integrator(osimModel.getMultibodySystem());
         integrator.setAccuracy(5.0e-4);
+
+        // Define the initial muscle states.
+        const Set<Muscle>& muscleSet = osimModel.getMuscles();
+        FatigableMuscle* muscle1 = dynamic_cast<FatigableMuscle*>(&muscleSet.get(0));
+        Millard2012EquilibriumMuscle* muscle2 = dynamic_cast<Millard2012EquilibriumMuscle*>(&muscleSet.get(1));
+        if ((muscle1 == NULL) || (muscle2 == NULL)) {
+            throw OpenSim::Exception("ControllerExample: muscle1 or muscle2 is not a FatigableMuscle or Millard2012EquilibriumMuscle and example cannot proceed.");
+        }
+        muscle1->setActivation(si, 0.01); 
+        muscle1->setFiberLength(si, 0.2); 
+        muscle2->setActivation(si, 0.01);
+        muscle2->setFiberLength(si, 0.2); 
+
 
         // Create the force reporter
         ForceReporter* reporter = new ForceReporter(&osimModel);
